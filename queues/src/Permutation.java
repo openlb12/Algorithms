@@ -5,16 +5,22 @@ public class Permutation {
     public static void main(String[] args) {
         int optSize = Integer.parseInt(args[0]);
         RandomizedQueue<String> text = new RandomizedQueue<String>();
-        for (String ikey : StdIn.readAllStrings()) {
-            text.enqueue(ikey);
+        // In inpt = new In(args[1]);
+        while (!StdIn.isEmpty()) {
+            text.enqueue(StdIn.readString());
         }
         if (optSize > text.size()) {
-            throw new IllegalArgumentException("Invalidated output size: " + String.valueOf(optSize));
+            throw new IllegalArgumentException("Invalidated output size: " + optSize);
         }
-        for (int idx = 0; idx < optSize; idx++) {
-            StdOut.print(text.sample() + " ");
+        int idx = 0;
+        for (String ikey : text) {
+            if (idx >= optSize) {
+                break;
+            }
+            StdOut.println(ikey);
+            ++idx;
+
         }
-        StdOut.println();
 
     }
 }

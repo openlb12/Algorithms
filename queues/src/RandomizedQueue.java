@@ -7,15 +7,16 @@ import java.util.NoSuchElementException;
 
 public class RandomizedQueue<Item> implements Iterable<Item> {
 
+    private static final int DATA_SIZE = 8;
+
     private Item[] data;
     private int end;
     private int capacity;
-    private static final int dataSize = 8;
 
 
     // construct an empty randomized queue
     public RandomizedQueue() {
-        capacity = dataSize;
+        capacity = DATA_SIZE;
         data = (Item[]) new Object[capacity];
         end = 0;
 
@@ -57,7 +58,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // resize data array
     private void shrinkData() {
-        if (capacity <= dataSize) return;
+        if (capacity <= DATA_SIZE) return;
         capacity /= 2;
         Item[] tmpData = (Item[]) new Object[capacity];
         for (int idx = 0; idx < end; idx++) {
@@ -79,7 +80,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             data[idx] = data[idx + 1];
         }
         end--;
-        if (end < capacity / 4 && capacity > dataSize) shrinkData();
+        if (end < capacity / 4 && capacity > DATA_SIZE) shrinkData();
         return elem;
     }
 
@@ -94,7 +95,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     private class ListIterator implements Iterator<Item> {
         private int iterLoc = 0;
-        private int[] ranOrd = StdRandom.permutation(end);
+        private final int[] ranOrd = StdRandom.permutation(end);
 
 //        public void ListIterator(int[] ranSeq) {
 //            ranOrd = ranSeq;

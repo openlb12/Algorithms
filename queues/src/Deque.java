@@ -73,12 +73,15 @@ public class Deque<Item> implements Iterable<Item> {
     // remove and return the item from the front
     public Item removeFirst() {
         if (isEmpty()) {
-            throw new IllegalArgumentException("Try to remove empty list");
+            throw new NoSuchElementException("Try to remove empty list");
         }
         Item elem = first.elem;
         first = first.next;
         if (size > 1) {
             first.previous = null;
+        } else {
+            first = null;
+            last = null;
         }
         size--;
         return elem;
@@ -87,12 +90,15 @@ public class Deque<Item> implements Iterable<Item> {
     // remove and return the item from the back
     public Item removeLast() {
         if (isEmpty()) {
-            throw new IllegalArgumentException("Try to remove empty list");
+            throw new NoSuchElementException("Try to remove empty list");
         }
         Item elem = last.elem;
         last = last.previous;
         if (size > 1) {
             last.next = null;
+        } else {
+            first = null;
+            last = null;
         }
         size--;
         return elem;
@@ -133,6 +139,7 @@ public class Deque<Item> implements Iterable<Item> {
         In input = new In(args[0]);
         Deque<String> text = new Deque<String>();
         String[] inputString = input.readAllStrings();
+
         for (String ikey : inputString) {
             text.addFirst(ikey);
 
