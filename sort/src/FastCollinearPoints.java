@@ -14,11 +14,13 @@ public class FastCollinearPoints {
     public FastCollinearPoints(Point[] points) {
         isPointsValidate(points);
         Stack<LineSegment> lines = new Stack<LineSegment>();
-        Stack<Double> slopes = new Stack<Double>();
+        Stack<SpotLine> lnStack = new Stack<SpotLine>();
+
         Arrays.sort(points);
 
+
         for (int i = 0; i < points.length - LINE_POINTS_LIMIT + 1; i++) {
-            Point[] searchPoints = Arrays.copyOf(points, points.length);
+            Point[] searchPoints = Arrays.copyOfRange(points, i, points.length);
             Arrays.sort(searchPoints, points[i].slopeOrder());
             int idx = 1;
             while (idx < searchPoints.length - LINE_POINTS_LIMIT + 2) {
@@ -47,16 +49,15 @@ public class FastCollinearPoints {
                     LineSegment identifiedLine = new LineSegment(minPoint, maxPoint);
                     double lnSlope = minPoint.slopeTo(maxPoint);
                     boolean isRepeated = false;
-                    for (double islp : slopes) {
-                        if (Double.compare(islp, lnSlope) == 0) {
+                    for (SpotLine sln : lnStack) {
+                        if (Double.compare(sln.getPoint().slopeTo(maxPoint), lnSlope) == 0) {
                             isRepeated = true;
                             break;
                         }
                     }
                     if (!isRepeated) {
                         lines.push(identifiedLine);
-                        slopes.push(lnSlope);
-
+                        lnStack.push(new SpotLine(points[i], lnSlope));
                     }
                     idx = idy;
 
@@ -133,5 +134,25 @@ public class FastCollinearPoints {
             segment.draw();
         }
         StdDraw.show();
+    }
+}
+
+
+// private class for online check
+class SpotLine {
+    Point pt;
+    double slope;
+
+    SpotLine(Point p, double slp) {
+        pt = p;
+        slope = slp;
+    }
+
+    Point getPoint() {
+        return pt;
+    }
+
+    double getSlope() {
+        return slope;
     }
 }
