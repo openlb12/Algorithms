@@ -12,7 +12,7 @@ public class Stacks<Item> {
 
     public void push(Item elem) {
         Node oldFirst = first;
-        first = new Node;
+        first = new Node();
         first.item = elem;
         first.next = oldFirst;
     }
@@ -20,5 +20,6 @@ public class Stacks<Item> {
     public Item pop() {
         Item elem = first.item;
         first = first.next;
+        return elem;
     }
 }
