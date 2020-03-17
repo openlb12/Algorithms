@@ -14,93 +14,91 @@ public class FastCollinearPoints {
     public FastCollinearPoints(Point[] points) {
         isPointsValidate(points);
 
-        Stack<SpotLine> lnStack = new Stack<SpotLine>();
+        Stack<LineSegment> lnStack = new Stack<LineSegment>();
+
 //        Arrays.sort(points);
 
 
         for (int i = 0; i < points.length - LINE_POINTS_LIMIT + 1; i++) {
-            Point[] searchPoints = Arrays.copyOfRange(points, i, points.length);
-            Arrays.sort(searchPoints, points[i].slopeOrder());
-            int idx = 1;
-            while (idx < searchPoints.length - LINE_POINTS_LIMIT + 2) {
-                int idy = idx + LINE_POINTS_LIMIT - 2;
-                boolean isCollinear = false;
-                double slopeTest = searchPoints[0].slopeTo(searchPoints[idx]);
-
-
-                while (idy < searchPoints.length &&
-                        Double.compare(slopeTest,
-                                searchPoints[0].slopeTo(searchPoints[idy])) == 0) {
-                    isCollinear = true;
-                    idy++;
-                }
-
-                if (isCollinear) {
-                    Point minPoint = searchPoints[0];
-                    Point maxPoint = searchPoints[0];
-                    for (int iter = idx; iter < idy; iter++) {
-                        if (maxPoint.compareTo(searchPoints[iter]) < 0) {
-                            maxPoint = searchPoints[iter];
-                        }
-                        if (minPoint.compareTo(searchPoints[iter]) > 0) {
-                            minPoint = searchPoints[iter];
-                        }
-                    }
-
-                    boolean isRepeated = false;
-                    for (SpotLine sln : lnStack) {
-                        if (sln.checkOnline(minPoint, maxPoint)) {
-                            isRepeated = true;
-                            break;
-                        }
-                    }
-
-                    if (!isRepeated) {
-                        lnStack.push(new SpotLine(minPoint, maxPoint));
-                    }
-                    idx = idy;
-
-                } else {
-                    idx++;
-                }
+            Point[] neatPoints = Arrays.copyOfRange(points, i + 1, points.length);
+            Point[] searchedPoints = Arrays.copyOfRange(points, 0, i);
+            Arrays.sort(neatPoints, points[i].slopeOrder());
+            if (searchedPoints.length > 0) {
+                Arrays.sort(searchedPoints, points[i].slopeOrder());
+                neatPoints = deleteRepeatLines(searchedPoints, points[i], neatPoints);
             }
+            if (neatPoints.length >= LINE_POINTS_LIMIT - 1) {
 
+
+                int idx = 0;
+                while (idx < neatPoints.length - LINE_POINTS_LIMIT + 2) {
+                    int idy = idx + LINE_POINTS_LIMIT - 2;
+                    boolean isCollinear = false;
+                    double slopeTest = points[i].slopeTo(neatPoints[idx]);
+
+                    while (idy < neatPoints.length &&
+                            Double.compare(slopeTest,
+                                    points[i].slopeTo(neatPoints[idy])) == 0) {
+                        isCollinear = true;
+                        idy++;
+                    }
+
+                    if (isCollinear) {
+                        Point minPoint = points[i];
+                        Point maxPoint = points[i];
+                        for (int iter = idx; iter < idy; iter++) {
+                            if (maxPoint.compareTo(neatPoints[iter]) < 0) {
+                                maxPoint = neatPoints[iter];
+                            }
+                            if (minPoint.compareTo(neatPoints[iter]) > 0) {
+                                minPoint = neatPoints[iter];
+                            }
+                        }
+
+                        lnStack.push(new LineSegment(minPoint, maxPoint));
+                        idx = idy;
+
+                    } else {
+                        idx++;
+                    }
+                }
+
+            }
         }
         lineSects = new LineSegment[lnStack.size()];
         for (int i = lineSects.length - 1; i >= 0; i--) {
-            SpotLine spl = lnStack.pop();
-            lineSects[i] = new LineSegment(spl.bgn, spl.end);
+            lineSects[i] = lnStack.pop();
         }
     }
-
-    // private class for online check
-    private class SpotLine {
-        Point bgn;
-        Point end;
-        double slope;
-
-        SpotLine(Point pb, Point pe) {
-            bgn = pb;
-            end = pe;
-            slope = pb.slopeTo(pe);
-        }
-
-        boolean checkOnline(Point pb, Point pe) {
-
-            if (Double.compare(pb.slopeTo(pe), slope) == 0) {
-                if (bgn == pb) {
-                    return Double.compare(bgn.slopeTo(pe), slope) == 0;
-                } else {
-                    return Double.compare(bgn.slopeTo(pb), slope) == 0;
-                }
-            }
-            return false;
-        }
-
-        double getSlope() {
-            return slope;
-        }
-    }
+//
+//    // private class for online check
+//    private class SpotLine {
+//        Point bgn;
+//        Point end;
+//        double slope;
+//
+//        SpotLine(Point pb, Point pe) {
+//            bgn = pb;
+//            end = pe;
+//            slope = pb.slopeTo(pe);
+//        }
+//
+//        boolean checkOnline(Point pb, Point pe) {
+//
+//            if (Double.compare(pb.slopeTo(pe), slope) == 0) {
+//                if (bgn == pb) {
+//                    return true;
+//                } else {
+//                    return Double.compare(bgn.slopeTo(pb), slope) == 0;
+//                }
+//            }
+//            return false;
+//        }
+//
+//        double getSlope() {
+//            return slope;
+//        }
+//    }
 
     // check the validity of constructor points
     private void isPointsValidate(Point[] points) {
@@ -117,6 +115,40 @@ public class FastCollinearPoints {
                 }
             }
         }
+    }
+
+    // delete repeat lines
+    private Point[] deleteRepeatLines(Point[] checkPoints, Point origin, Point[] pointsList) {
+        Stack<Double> slopeList = new Stack<Double>();
+        Stack<Point> neatPointsStack = new Stack<Point>();
+        double testSlope = origin.slopeTo(checkPoints[0]);
+        slopeList.push(testSlope);
+        for (Point pt : checkPoints) {
+            double tmpSlope = origin.slopeTo(pt);
+            if (tmpSlope > testSlope) {
+                slopeList.push(tmpSlope);
+                testSlope = tmpSlope;
+            }
+        }
+        for (Point pt : pointsList) {
+            testSlope = origin.slopeTo(pt);
+            boolean isRepeat = false;
+            for (double slp : slopeList) {
+                if (Double.compare(testSlope, slp) == 0) {
+                    isRepeat = true;
+                    break;
+                }
+            }
+            if (!isRepeat) {
+                neatPointsStack.push(pt);
+            }
+        }
+        Point[] neatPoints = new Point[neatPointsStack.size()];
+        for (int i = 0; i < neatPoints.length; i++) {
+            neatPoints[i] = neatPointsStack.pop();
+        }
+        return neatPoints;
+
     }
 
     // the number of line segments
