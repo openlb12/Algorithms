@@ -13,10 +13,9 @@ public class FastCollinearPoints {
 
     public FastCollinearPoints(Point[] points) {
         isPointsValidate(points);
-        Stack<LineSegment> lines = new Stack<LineSegment>();
-        Stack<SpotLine> lnStack = new Stack<SpotLine>();
 
-        Arrays.sort(points);
+        Stack<SpotLine> lnStack = new Stack<SpotLine>();
+//        Arrays.sort(points);
 
 
         for (int i = 0; i < points.length - LINE_POINTS_LIMIT + 1; i++) {
@@ -26,10 +25,11 @@ public class FastCollinearPoints {
             while (idx < searchPoints.length - LINE_POINTS_LIMIT + 2) {
                 int idy = idx + LINE_POINTS_LIMIT - 2;
                 boolean isCollinear = false;
+                double slopeTest = searchPoints[0].slopeTo(searchPoints[idx]);
 
 
                 while (idy < searchPoints.length &&
-                        Double.compare(searchPoints[0].slopeTo(searchPoints[idx]),
+                        Double.compare(slopeTest,
                                 searchPoints[0].slopeTo(searchPoints[idy])) == 0) {
                     isCollinear = true;
                     idy++;
@@ -46,18 +46,17 @@ public class FastCollinearPoints {
                             minPoint = searchPoints[iter];
                         }
                     }
-                    LineSegment identifiedLine = new LineSegment(minPoint, maxPoint);
-                    double lnSlope = minPoint.slopeTo(maxPoint);
+
                     boolean isRepeated = false;
                     for (SpotLine sln : lnStack) {
-                        if (Double.compare(sln.getPoint().slopeTo(maxPoint), lnSlope) == 0) {
+                        if (sln.checkOnline(minPoint, maxPoint)) {
                             isRepeated = true;
                             break;
                         }
                     }
+
                     if (!isRepeated) {
-                        lines.push(identifiedLine);
-                        lnStack.push(new SpotLine(points[i], lnSlope));
+                        lnStack.push(new SpotLine(minPoint, maxPoint));
                     }
                     idx = idy;
 
@@ -67,12 +66,41 @@ public class FastCollinearPoints {
             }
 
         }
-        lineSects = new LineSegment[lines.size()];
+        lineSects = new LineSegment[lnStack.size()];
         for (int i = lineSects.length - 1; i >= 0; i--) {
-            lineSects[i] = lines.pop();
+            SpotLine spl = lnStack.pop();
+            lineSects[i] = new LineSegment(spl.bgn, spl.end);
         }
     }
 
+    // private class for online check
+    private class SpotLine {
+        Point bgn;
+        Point end;
+        double slope;
+
+        SpotLine(Point pb, Point pe) {
+            bgn = pb;
+            end = pe;
+            slope = pb.slopeTo(pe);
+        }
+
+        boolean checkOnline(Point pb, Point pe) {
+
+            if (Double.compare(pb.slopeTo(pe), slope) == 0) {
+                if (bgn == pb) {
+                    return Double.compare(bgn.slopeTo(pe), slope) == 0;
+                } else {
+                    return Double.compare(bgn.slopeTo(pb), slope) == 0;
+                }
+            }
+            return false;
+        }
+
+        double getSlope() {
+            return slope;
+        }
+    }
 
     // check the validity of constructor points
     private void isPointsValidate(Point[] points) {
@@ -138,21 +166,4 @@ public class FastCollinearPoints {
 }
 
 
-// private class for online check
-class SpotLine {
-    Point pt;
-    double slope;
 
-    SpotLine(Point p, double slp) {
-        pt = p;
-        slope = slp;
-    }
-
-    Point getPoint() {
-        return pt;
-    }
-
-    double getSlope() {
-        return slope;
-    }
-}
