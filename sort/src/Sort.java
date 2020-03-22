@@ -1,5 +1,4 @@
 import edu.princeton.cs.algs4.StdOut;
-import edu.princeton.cs.algs4.StdRandom;
 
 import java.util.Arrays;
 
@@ -100,7 +99,7 @@ public class Sort {
     }
 
     public static void quickSort(Comparable[] a) {
-        StdRandom.shuffle(a);
+//        StdRandom.shuffle(a);
         quickScan(a, 0, a.length);
 
     }
@@ -110,19 +109,65 @@ public class Sort {
         int left = lo;
         int rigt = hi;
         while (true) {
-            while (less(a[lo], a[--rigt])) {
-                if (rigt == left) break;
-            }
+            while (less(a[lo], a[--rigt])) ;
             while (less(a[++left], a[lo])) {
-                if (left == rigt) break;
+                if (left >= rigt) break;
             }
-            if (left >= rigt) break;
+            if (rigt <= left) break;
             exch(a, left, rigt);
         }
         exch(a, lo, rigt);
         printResult(lo + "" + hi, a);
         quickScan(a, lo, rigt);
         quickScan(a, rigt + 1, hi);
+    }
+
+    public static void duplicate_quicksort(Comparable[] a) {
+        duplicate_quickscan(a, 0, a.length);
+    }
+
+    private static void duplicate_quickscan(Comparable[] a, int lo, int hi) {
+        if (hi - lo <= 1) {
+            return;
+        }
+        int partition_id = lo;
+//        int left = lo;
+        int rigt = hi;
+
+
+        for (int left = lo + 1; left < hi; left++) {
+            if (left >= rigt) {
+                rigt = left;
+                break;
+            }
+            int leftCompareToPart = a[left].compareTo(a[partition_id]);
+            if (leftCompareToPart < 0) {
+                exch(a, left, partition_id);
+                partition_id++;
+                continue;
+            } else if (leftCompareToPart == 0) {
+                continue;
+            } else {
+                while (a[--rigt].compareTo(a[partition_id]) > 0) ;
+                if (rigt <= left) {
+                    rigt = left;
+                    break;
+                }
+                int rightCompareToPart = a[rigt].compareTo(a[partition_id]);
+                if (rightCompareToPart == 0) {
+                    exch(a, left, rigt);
+                } else if (rightCompareToPart < 0) {
+                    exch(a, left, rigt);
+                    exch(a, left, partition_id);
+                    partition_id++;
+                }
+            }
+        }
+        printResult(lo + "" + hi, a);
+        duplicate_quickscan(a, lo, partition_id);
+        duplicate_quickscan(a, rigt, hi);
+        return;
+
     }
 
     private static void printResult(String id, Object[] list) {
@@ -148,7 +193,7 @@ public class Sort {
 //        shellSort(testList);
         printResult(" ", testList);
 //        mergeSort(testList);
-        quickSort(testList);
+        duplicate_quicksort(testList);
         printResult(" ", testList);
 //        selectSort(testList);
 

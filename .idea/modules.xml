@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/collisionSystem/collisionSystem.iml" filepath="$PROJECT_DIR$/collisionSystem/collisionSystem.iml" />
+      <module fileurl="file://$PROJECT_DIR$/puzzles/puzzles.iml" filepath="$PROJECT_DIR$/puzzles/puzzles.iml" />
       <module fileurl="file://$PROJECT_DIR$/queues/queues.iml" filepath="$PROJECT_DIR$/queues/queues.iml" />
       <module fileurl="file://$PROJECT_DIR$/sort/sort.iml" filepath="$PROJECT_DIR$/sort/sort.iml" />
     </modules>
