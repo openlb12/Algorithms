@@ -31,14 +31,24 @@ public class Solver {
 
 
                 boolean addNode = true;
-
-                while (retriever != null) {
-                    if (snode.isEqual(retriever)) {
-                        addNode = false;
-                        break;
+                for (BoardNode sn : search_node) {
+                    if (snode.isEqual(sn)) {
+                        if (snode.compareTo(sn) < 0) {
+                            addNode = false;
+                            break;
+                        } else {
+                            addNode = false;
+                            break;
+                        }
                     }
-                    retriever = retriever.previous_node;
                 }
+//                while (retriever != null) {
+//                    if (snode.isEqual(retriever)) {
+//                        addNode = false;
+//                        break;
+//                    }
+//                    retriever = retriever.previous_node;
+//                }
                 if (addNode) {
                     search_node.insert(snode);
                 }
@@ -96,12 +106,12 @@ public class Solver {
     }
 
     private class BoardNode implements Comparable<BoardNode> {
-        private Board node;
-        private int priority;
-        private int moves;
-        private BoardNode previous_node;
+        private final Board node;
+        private final int priority;
+        private final int moves;
+        private final BoardNode previous_node;
 
-        public BoardNode(BoardNode pn, Board bd) {
+        BoardNode(BoardNode pn, Board bd) {
             node = bd;
             previous_node = pn;
             if (pn == null) {
@@ -112,28 +122,35 @@ public class Solver {
             priority = moves + node.manhattan();
         }
 
+//        public void resetBoardNode(BoardNode bd) {
+//            node = bd.getNode();
+//            moves = bd.getMoves();
+//            priority = bd.getPriority();
+//            previous_node = bd.getPrevious_node();
+//        }
+
         @Override
         public int compareTo(BoardNode o) {
             return this.priority - o.getPriority();
         }
 
-        public int getPriority() {
+        int getPriority() {
             return priority;
         }
 
-        public int getMoves() {
+        int getMoves() {
             return moves;
         }
 
-        public Board getNode() {
+        Board getNode() {
             return node;
         }
 
-        public BoardNode getPrevious_node() {
+        BoardNode getPrevious_node() {
             return previous_node;
         }
 
-        public boolean isEqual(BoardNode x) {
+        boolean isEqual(BoardNode x) {
             return this.node.equals(x.getNode());
         }
     }

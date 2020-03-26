@@ -4,7 +4,7 @@ import edu.princeton.cs.algs4.StdOut;
 
 import java.util.Arrays;
 
-public class Board {
+public final class Board {
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
     private final int[] board_tiles;
@@ -100,7 +100,13 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
-        return this.toString() == y.toString();
+        if (y == this) return true;
+        if (y == null) return false;
+        if (y.getClass() != this.getClass()) return false;
+        Board that = (Board) y;
+        if (that.black_tile_x != this.black_tile_x) return false;
+        if (that.black_tile_y != this.black_tile_y) return false;
+        return Arrays.equals(that.board_tiles, this.board_tiles);
     }
 
     private int[] tile_exch(int loc1, int loc2) {
