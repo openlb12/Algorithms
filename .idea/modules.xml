@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/collisionSystem/collisionSystem.iml" filepath="$PROJECT_DIR$/collisionSystem/collisionSystem.iml" />
+      <module fileurl="file://$PROJECT_DIR$/kdtree/kdtree.iml" filepath="$PROJECT_DIR$/kdtree/kdtree.iml" />
       <module fileurl="file://$PROJECT_DIR$/percolation/percolation.iml" filepath="$PROJECT_DIR$/percolation/percolation.iml" />
       <module fileurl="file://$PROJECT_DIR$/puzzles/puzzles.iml" filepath="$PROJECT_DIR$/puzzles/puzzles.iml" />
       <module fileurl="file://$PROJECT_DIR$/queues/queues.iml" filepath="$PROJECT_DIR$/queues/queues.iml" />
