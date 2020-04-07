@@ -4,7 +4,7 @@ import edu.princeton.cs.algs4.SET;
 import edu.princeton.cs.algs4.Stack;
 
 public class PointSET {
-    SET<Point2D> set;
+    private SET<Point2D> set;
 
     public PointSET() {
         // construct an empty set of points
@@ -25,9 +25,7 @@ public class PointSET {
         // add the point to the set (if it is not already in the set)
         if (p == null) throw new IllegalArgumentException(
                 "point p is null in insert function");
-        if (set.contains(p)) throw new IllegalArgumentException(
-                "point p in insert function already exist");
-        set.add(p);
+        if (!set.contains(p)) set.add(p);
     }
 
     public boolean contains(Point2D p) {
@@ -60,11 +58,12 @@ public class PointSET {
     public Point2D nearest(Point2D p) {
         if (p == null) throw new IllegalArgumentException(
                 "point p is null in nearest function");
+        if (isEmpty()) return null;
         // a nearest neighbor in the set to point p; null if the set is empty
         Point2D nearestPoint = set.min();
-        double minDist = nearestPoint.distanceTo(p);
+        double minDist = nearestPoint.distanceSquaredTo(p);
         for (Point2D q : set) {
-            double distance = q.distanceTo(p);
+            double distance = q.distanceSquaredTo(p);
             if (distance < minDist) {
                 minDist = distance;
                 nearestPoint = q;
