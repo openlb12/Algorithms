@@ -54,19 +54,22 @@ public class KdTree {
         }
 
         RectHV[] split(RectHV rect) {
-            if (!rect.contains(pt)) throw new IllegalArgumentException("Wrong rectangle in split");
+//            if (!rect.contains(pt)) throw new IllegalArgumentException("Wrong rectangle in split");
             RectHV[] rectList = new RectHV[2];
             double x0, y0, x1, y1;
+            double ndx, ndy;
             x0 = rect.xmin();
             y0 = rect.ymin();
             x1 = rect.xmax();
             y1 = rect.ymax();
+            ndx = pt.x();
+            ndy = pt.y();
             if (hierarchy % 2 == 0) {
-                rectList[0] = new RectHV(x0, y0, pt.x(), y1);
-                rectList[1] = new RectHV(pt.x(), y0, x1, y1);
+                rectList[0] = new RectHV(x0, y0, ndx, y1);
+                rectList[1] = new RectHV(ndx, y0, x1, y1);
             } else {
-                rectList[0] = new RectHV(x0, y0, x1, pt.y());
-                rectList[1] = new RectHV(x0, pt.y(), x1, y1);
+                rectList[0] = new RectHV(x0, y0, x1, ndy);
+                rectList[1] = new RectHV(x0, ndy, x1, y1);
             }
             return rectList;
         }
@@ -191,15 +194,15 @@ public class KdTree {
         // all points that are inside the rectangle (or on the boundary)
         if (rect == null) throw new IllegalArgumentException(
                 "rect is null in range function");
-        if (root == null) return null;
+        RectHV rootRect = new RectHV(0.0, 0.0, 1.0, 1.0);
+        if (root == null || !rootRect.intersects(rect)) return null;
         Stack<Point2D> pts = new Stack<Point2D>();
         Stack<Node> st = new Stack<Node>();
         Stack<RectHV> rectHVS = new Stack<RectHV>();
-        RectHV rootRect = new RectHV(0.0, 0.0, 1.0, 1.0);
         st.push(root);
         rectHVS.push(rootRect);
 
-        root.draw(rootRect);
+//        root.draw(rootRect);
         while (!st.isEmpty()) {
             Node tmp = st.pop();
             RectHV tmpRect = rectHVS.pop();
@@ -226,46 +229,126 @@ public class KdTree {
         return pts;
     }
 
-    private Point2D nearest(Node x, Point2D p) {
-        if (x == null || p == null) return null;
-        double dist = x.pt.distanceSquaredTo(p);
-        double lineDist = x.distance(p);
-        int cmp = x.compareTo(p);
-        Point2D npt;
-        if (cmp <= 0) {
-            npt = nearest(x.right, p);
-            if (npt == null) {
-                npt = nearest(x.left, p);
-            } else if (npt.distanceSquaredTo(p) > lineDist) {
-                Point2D lp = nearest(x.left, p);
-                if (lp != null && p.distanceSquaredTo(npt) > p.distanceSquaredTo(lp)) npt = lp;
-            }
-        } else {
-            npt = nearest(x.left, p);
-            if (npt == null) {
-                npt = nearest(x.right, p);
-            } else if (npt.distanceSquaredTo(p) > lineDist) {
-                Point2D rp = nearest(x.right, p);
-                if (rp != null && p.distanceSquaredTo(npt) > p.distanceSquaredTo(rp)) npt = rp;
-            }
 
+    private Point2D nearest(Node x, Point2D p, Point2D npt, RectHV rect) {
+//        StdOut.println(x);
+        if (x == null || p == null || npt == null || rect == null) return null;
+        double nptDistance = npt.distanceSquaredTo(p);
+        if (nptDistance < rect.distanceSquaredTo(p)) return npt;
+        if (nptDistance > x.pt.distanceSquaredTo(p)) {
+            npt = x.pt;
+            nptDistance = x.pt.distanceSquaredTo(p);
         }
-        if (npt == null || p.distanceSquaredTo(npt) > dist) npt = x.pt;
+        RectHV[] rectList = x.split(rect);
+        int cmp = x.compareTo(p);
+        Point2D tmpnpt = npt;
+        double leftRectDis = rectList[0].distanceSquaredTo(p);
+        double rigtRectDis = rectList[1].distanceSquaredTo(p);
+        if (cmp <= 0 && rigtRectDis < nptDistance) {
+            tmpnpt = nearest(x.right, p, npt, rectList[1]);
+            if (tmpnpt == null) {
+                if (leftRectDis < nptDistance) {
+                    tmpnpt = nearest(x.left, p, npt, rectList[0]);
+                }
+            } else {
+                if (tmpnpt.distanceSquaredTo(p) < nptDistance) {
+                    nptDistance = tmpnpt.distanceSquaredTo(p);
+                } else {
+                    tmpnpt = npt;
+                }
+                if (leftRectDis < nptDistance) {
+                    Point2D lp = nearest(x.left, p, tmpnpt, rectList[0]);
+                    if (lp != null && lp.distanceSquaredTo(p) < nptDistance) {
+                        tmpnpt = lp;
+                    }
+                }
+            }
+        } else if (cmp > 0 && leftRectDis < nptDistance) {
+            tmpnpt = nearest(x.left, p, npt, rectList[0]);
+            if (tmpnpt == null) {
+                if (rigtRectDis < nptDistance) {
+                    tmpnpt = nearest(x.right, p, npt, rectList[1]);
+                }
+            } else {
+                if (tmpnpt.distanceSquaredTo(p) < nptDistance) {
+                    nptDistance = tmpnpt.distanceSquaredTo(p);
+                } else {
+                    tmpnpt = npt;
+                }
+                if (rigtRectDis < nptDistance) {
+                    Point2D rp = nearest(x.right, p, tmpnpt, rectList[1]);
+                    if (rp != null && rp.distanceSquaredTo(p) < nptDistance) {
+                        tmpnpt = rp;
+                    }
+                }
+            }
+        }
+        if (tmpnpt == null || tmpnpt.distanceSquaredTo(p) > nptDistance) tmpnpt = npt;
+        return tmpnpt;
+
+    }
+
+    private Point2D nearestUnrecurse(Point2D p) {
+        if (p == null) throw new IllegalArgumentException(
+                "point p is null in nearest function");
+        // a nearest neighbor in the set to point p; null if the set is empty
+        if (root == null) return null;
+        RectHV rect = new RectHV(0.0, 0.0, 1.0, 1.0);
+        Stack<Node> nds = new Stack<Node>();
+        Stack<RectHV> rects = new Stack<RectHV>();
+        Point2D npt = root.pt;
+        Double nptDistance = npt.distanceSquaredTo(p);
+        nds.push(root);
+        rects.push(rect);
+        while (!nds.isEmpty()) {
+            Node nd = nds.pop();
+//            StdOut.println(nd);
+            rect = rects.pop();
+            if (rect.distanceSquaredTo(p) >= nptDistance) continue;
+            if (nd.pt.distanceSquaredTo(p) < nptDistance) {
+                nptDistance = nd.pt.distanceSquaredTo(p);
+                npt = nd.pt;
+            }
+            RectHV[] tmpRectList = nd.split(rect);
+            int cmp = nd.compareTo(p);
+            if (cmp <= 0) {
+                if (nd.left != null && tmpRectList[0].distanceSquaredTo(p) < nptDistance) {
+                    nds.push(nd.left);
+                    rects.push(tmpRectList[0]);
+                }
+                if (nd.right != null && tmpRectList[1].distanceSquaredTo(p) < nptDistance) {
+                    nds.push(nd.right);
+                    rects.push(tmpRectList[1]);
+                }
+            } else {
+                if (nd.right != null && tmpRectList[1].distanceSquaredTo(p) < nptDistance) {
+                    nds.push(nd.right);
+                    rects.push(tmpRectList[1]);
+                }
+                if (nd.left != null && tmpRectList[0].distanceSquaredTo(p) < nptDistance) {
+                    nds.push(nd.left);
+                    rects.push(tmpRectList[0]);
+                }
+
+            }
+        }
         return npt;
+
     }
 
     public Point2D nearest(Point2D p) {
         if (p == null) throw new IllegalArgumentException(
                 "point p is null in nearest function");
-        // a nearest neighbor in the set to point p; null if the set is empty
-        return nearest(root, p);
-
+        if (root == null) return null;
+        return nearest(root, p, root.pt, new RectHV(0.0, 0.0, 1.0, 1.0));
     }
 
 
     public static void main(String[] args) {
         // unit testing of the methods (optional)
         In in = new In(args[0]);
+        double queryx = Double.parseDouble(args[1]);
+        double queryy = Double.parseDouble(args[2]);
         KdTree kdtree = new KdTree();
         while (!in.isEmpty()) {
             double x = in.readDouble();
@@ -280,7 +363,7 @@ public class KdTree {
         StdDraw.show();
 
 
-        Point2D checkpoint = new Point2D(0.7, 0.7);
+        Point2D checkpoint = new Point2D(queryx, queryy);
         StdDraw.setPenColor(StdDraw.GRAY);
         StdDraw.filledCircle(checkpoint.x(), checkpoint.y(), PENRAD);
 
