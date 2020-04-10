@@ -1,8 +1,9 @@
-import edu.princeton.cs.algs4.Stack;
+import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.StdOut;
 
 public class ST<Key extends Comparable<Key>, Value> {
-    Node root;
+    private Node root;
+
 
     private class Node implements Comparable<Node> {
         private final Key key;
@@ -17,6 +18,7 @@ public class ST<Key extends Comparable<Key>, Value> {
             right = null;
             left = null;
         }
+
 
         // does this equal y?
         @Override
@@ -127,27 +129,37 @@ public class ST<Key extends Comparable<Key>, Value> {
     }
 
     private Node delete(Node x, Key key) {
+        if (x == null) return null;
         int compareKey = x.getKey().compareTo(key);
         if (compareKey < 0) x.right = delete(x.right, key);
         else if (compareKey > 0) x.left = delete(x.left, key);
         else {
-            if (x.right == null) {
-                x
+            if (size(x) <= 1) return null;
+            else {
+                if (size(x.left) > size(x.right)) {
+                    Node tmp = max(x.left);
+                    tmp = new Node(tmp.getKey(), tmp.getVal());
+                    tmp.right = x.right;
+                    tmp.left = deleteMax(x.left);
+                    x = tmp;
+                } else {
+                    Node tmp = min(x.right);
+                    tmp = new Node(tmp.getKey(), tmp.getVal());
+                    tmp.left = x.left;
+                    tmp.right = deleteMin(x.right);
+                    x = tmp;
+                }
             }
         }
+        x.setCount(1 + size(x.left) + size(x.right));
+        return x;
     }
 
-//    public void delete(Key key) {
-//        // Delete key and its value from table
-//        // put(key, null);// Lazy version
-//        Elem<Key, Value> del_node = new Elem<Key, Value>(key, null);
-//        for (Elem<Key, Value> el : table) {
-//            if (el.equals(del_node)) {
-//                return el.getVal();
-//            }
-//        }
-//        return null;
-//    }
+    public void delete(Key key) {
+        // Delete key and its value from table
+        // put(key, null);// Lazy version
+        root = delete(root, key);
+    }
 
 
     public boolean contains(Key key) {
@@ -170,21 +182,42 @@ public class ST<Key extends Comparable<Key>, Value> {
         else return x.getCount();
     }
 
-    Iterable<Key> keys() {
-        // All the keys in the table. Return an iterable object
+//    public Iterable<Key> sortedKeys() {
+//        // All the keys in the table. Return an iterable object
+//        if (root == null) return null;
+//        Stack<Key> list = new Stack<Key>();
+//        Stack<Node> ndlist = new Stack<Node>();
+//        ndlist.push(root);
+//        list.push(root.getKey());
+//        while (!ndlist.isEmpty()) {
+//            Node rt = ndlist.pop();
+//            Node tmp = rt;
+//            while (tmp.right != null) {
+//                ndlist.push(tmp.right);
+//                tmp = tmp.right;
+//            }
+//        }
+//        return list.iterator();
+//    }
+
+    public Iterable<Key> keys() {
         if (root == null) return null;
-        Stack<Key> list = new Stack<Key>();
-        Stack<Node> ndlist = new Stack<Node>();
-        ndlist.push(root);
-        while (!ndlist.isEmpty()) {
-            Node rt = ndlist.pop();
-            Node tmp = rt;
-            while (tmp.right != null) {
-                ndlist.push(tmp.right);
-                tmp = tmp.right
+        Queue<Key> keys = new Queue<Key>();
+        Queue<Node> nds = new Queue<Node>();
+        nds.enqueue(root);
+        while (!nds.isEmpty()) {
+            Node tmp = nds.dequeue();
+            keys.enqueue(tmp.getKey());
+            if (tmp.left != null) {
+                nds.enqueue(tmp.left);
+            }
+            if (tmp.right != null) {
+                nds.enqueue(tmp.right);
             }
         }
+        return keys;
     }
+
 //
 //    Iterable<Key> keys(Key lo, Key hi) {
 //        // Keys in [lo..hi], in sorted order
@@ -195,9 +228,10 @@ public class ST<Key extends Comparable<Key>, Value> {
 //    }
 
     private Node deleteMax(Node x) {
+        if (x == null) return null;
         if (x.right == null) return x.left;
         else {
-            x = deleteMax(x.right);
+            x.right = deleteMax(x.right);
             x.setCount(size(x.left) + size(x.right) + 1);
             return x;
         }
@@ -209,9 +243,10 @@ public class ST<Key extends Comparable<Key>, Value> {
     }
 
     private Node deleteMin(Node x) {
+        if (x == null) return null;
         if (x.left == null) return x.right;
         else {
-            x = deleteMin(x.left);
+            x.left = deleteMin(x.left);
             x.setCount(size(x.left) + size(x.right) + 1);
             return x;
         }
@@ -295,22 +330,32 @@ public class ST<Key extends Comparable<Key>, Value> {
         else return tmp.getKey();
     }
 
-    public Key max() {
-        if (root == null) return null;
-        Node tmp = root;
+    private Node max(Node x) {
+        if (x == null) return null;
+        Node tmp = x;
         while (tmp.right != null) {
             tmp = tmp.right;
         }
-        return tmp.getKey();
+        return tmp;
+    }
+
+    public Key max() {
+        if (root == null) return null;
+        return max(root).getKey();
+    }
+
+    private Node min(Node x) {
+        if (x == null) return null;
+        Node tmp = x;
+        while (tmp.left != null) {
+            tmp = tmp.left;
+        }
+        return tmp;
     }
 
     public Key min() {
         if (root == null) return null;
-        Node tmp = root;
-        while (tmp.left != null) {
-            tmp = tmp.left;
-        }
-        return tmp.getKey();
+        return min(root).getKey();
     }
 
     public static void main(String[] args) {
@@ -319,6 +364,20 @@ public class ST<Key extends Comparable<Key>, Value> {
         for (String s : list) {
             st.put(s, 0);
         }
+        for (String s : st.keys()) {
+            StdOut.print(s + ", ");
+        }
+        StdOut.println();
+        st.delete("H");
+        for (String s : st.keys()) {
+            StdOut.print(s + ", ");
+        }
+        StdOut.println();
+        st.deleteMax();
+        for (String s : st.keys()) {
+            StdOut.print(s + ", ");
+        }
+        StdOut.println();
         StdOut.println(st.size());
         StdOut.println(st.min());
         StdOut.println(st.max());
