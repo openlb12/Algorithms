@@ -207,16 +207,14 @@
               files="(RingBuffer).java"/>
     
     <!-- students need ^ as xor operator in LFSR and PhotoMagic -->
-    <suppress id="BitwiseXor"
-              files="(LFSR|PhotoMagic).java"/>
-
-    <!-- these files do some bit-whacking -->
+    <!-- students may use bit-whacking in LFSR, but limits register size -->
+    <!-- HammingEncoder, HammingDecoder, and TOY do some bit-whacking -->
     <suppress id="BitwiseAnd"
-              files="(HammingEncoder|HammingDecoder|TOY).java"/>
+              files="(LFSR|HammingEncoder|HammingDecoder|TOY).java"/>
     <suppress id="BitwiseOr"
-              files="(HammingEncoder|HammingDecoder|TOY).java"/>
+              files="(LFSR|HammingEncoder|HammingDecoder|TOY).java"/>
     <suppress id="BitwiseXor"
-              files="(HammingEncoder|HammingDecoder|TOY).java"/>
+              files="(LFSR|PhotoMagic|HammingEncoder|HammingDecoder|TOY).java"/>
 
     <!-- convenient to put multiple statements on one line -->
     <suppress checks="OneStatementPerLine"

@@ -99,6 +99,7 @@
 -->
 
     <module name="RegexpOnFilename">
+        <property name="id" value="IllegalFilename"/>
         <property name="severity" value="error"/>
         <property name="fileNamePattern" value="^(StdIn|StdOut|StdDraw|StdAudio|StdRandom|StdStats|StdArrayIO|
                                                   |In|Out|BinaryStdIn|BinaryStdOut|BinaryIn|BinaryOut|Draw|Picture|
@@ -115,15 +116,7 @@
     </module>
 
     <module name="RegexpOnFilename">
-        <property name="severity" value="error"/>
-        <property name="fileNamePattern" value="126$"/>
-        <property name="match" value="true"/>
-        <property name="fileExtensions" value="java"/>
-        <property name="ignoreFileNameExtensions" value="true"/>
-        <message key = "regexp.filename.match" value="Do not submit a file whose name ends in ''126''; that suffix is reserved by the autograder."/>
-    </module>
-
-    <module name="RegexpOnFilename">
+        <property name="id" value="IllegalFilename"/>
         <property name="severity" value="error"/>
         <property name="fileNamePattern" value="226$"/>
         <property name="match" value="true"/>
@@ -193,6 +186,10 @@
             <message key = "illegal.method.call" value="Do not call ''{0}'' in this course. This method is a shortcut to ''System.getProperty()''. Did you mean to call ''Integer.parseInt()'' instead?"/>
         </module>
 
+        <module name="IllegalMethodCall">
+            <property name="format" value="Arrays\.parallelSort"/>
+            <message key = "illegal.method.call" value="Do not call ''{0}'' in this course. Instead, use ''Arrays.sort()''."/>
+        </module>
 
         <!-- =========================================================================== -->
         <!-- END: CUSTOM CHECKERS (by wayne)                                             -->

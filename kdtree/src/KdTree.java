@@ -7,8 +7,8 @@ import edu.princeton.cs.algs4.StdDraw;
 
 public class KdTree {
     private static final double PENRAD = 0.01;
-//    private static final boolean RED = true;
-//    private static final boolean BLACK = false;
+    //    private static final boolean RED = true;
+    //    private static final boolean BLACK = false;
 
     private class Node {
 
@@ -16,7 +16,7 @@ public class KdTree {
         private Node left, right;
         private int hierarchy;
         private int count;
-//        private boolean color;
+        //        private boolean color;
 
         private Node(Point2D p, int h) {
             pt = p;
@@ -42,11 +42,12 @@ public class KdTree {
             if (pt == null || area == null) return;
             StdDraw.setPenColor(StdDraw.BLACK);
             StdDraw.filledCircle(pt.x(), pt.y(), PENRAD);
-//            StdDraw.text(pt.x(), pt.y(), pt.toString() + hierarchy);
+            //            StdDraw.text(pt.x(), pt.y(), pt.toString() + hierarchy);
             if (hierarchy % 2 == 0) {
                 StdDraw.setPenColor(StdDraw.RED);
                 StdDraw.line(pt.x(), area.ymin(), pt.x(), area.ymax());
-            } else {
+            }
+            else {
                 StdDraw.setPenColor(StdDraw.BLUE);
                 StdDraw.line(area.xmin(), pt.y(), area.xmax(), pt.y());
 
@@ -54,7 +55,7 @@ public class KdTree {
         }
 
         RectHV[] split(RectHV rect) {
-//            if (!rect.contains(pt)) throw new IllegalArgumentException("Wrong rectangle in split");
+            //            if (!rect.contains(pt)) throw new IllegalArgumentException("Wrong rectangle in split");
             RectHV[] rectList = new RectHV[2];
             double x0, y0, x1, y1;
             double ndx, ndy;
@@ -67,7 +68,8 @@ public class KdTree {
             if (hierarchy % 2 == 0) {
                 rectList[0] = new RectHV(x0, y0, ndx, y1);
                 rectList[1] = new RectHV(ndx, y0, x1, y1);
-            } else {
+            }
+            else {
                 rectList[0] = new RectHV(x0, y0, x1, ndy);
                 rectList[1] = new RectHV(x0, ndy, x1, y1);
             }
@@ -80,7 +82,8 @@ public class KdTree {
                 StdDraw.setPenColor(StdDraw.RED);
                 StdDraw.filledCircle(pt.x(), pt.y(), PENRAD);
                 StdDraw.text(pt.x(), pt.y(), pt.toString() + hierarchy);
-            } else {
+            }
+            else {
                 StdDraw.setPenColor(StdDraw.BLUE);
                 StdDraw.filledCircle(pt.x(), pt.y(), PENRAD);
                 StdDraw.text(pt.x(), pt.y(), pt.toString() + hierarchy);
@@ -202,7 +205,7 @@ public class KdTree {
         st.push(root);
         rectHVS.push(rootRect);
 
-//        root.draw(rootRect);
+        //        root.draw(rootRect);
         while (!st.isEmpty()) {
             Node tmp = st.pop();
             RectHV tmpRect = rectHVS.pop();
@@ -218,20 +221,20 @@ public class KdTree {
             }
         }
 
-//        if (root == null) return;
-//        Stack<Node> st = new Stack<Node>();
-//        Stack<RectHV> rect = new Stack<RectHV>();
-//        while ()
-//            st.push(root);
-//        rect.push(rootRect);
-//        root.draw(rootRect);
+        //        if (root == null) return;
+        //        Stack<Node> st = new Stack<Node>();
+        //        Stack<RectHV> rect = new Stack<RectHV>();
+        //        while ()
+        //            st.push(root);
+        //        rect.push(rootRect);
+        //        root.draw(rootRect);
 
         return pts;
     }
 
 
     private Point2D nearest(Node x, Point2D p, Point2D npt, RectHV rect) {
-//        StdOut.println(x);
+        //        StdOut.println(x);
         if (x == null || p == null || npt == null || rect == null) return null;
         double nptDistance = npt.distanceSquaredTo(p);
         if (nptDistance < rect.distanceSquaredTo(p)) return npt;
@@ -250,10 +253,12 @@ public class KdTree {
                 if (leftRectDis < nptDistance) {
                     tmpnpt = nearest(x.left, p, npt, rectList[0]);
                 }
-            } else {
+            }
+            else {
                 if (tmpnpt.distanceSquaredTo(p) < nptDistance) {
                     nptDistance = tmpnpt.distanceSquaredTo(p);
-                } else {
+                }
+                else {
                     tmpnpt = npt;
                 }
                 if (leftRectDis < nptDistance) {
@@ -263,16 +268,19 @@ public class KdTree {
                     }
                 }
             }
-        } else if (cmp > 0 && leftRectDis < nptDistance) {
+        }
+        else if (cmp > 0 && leftRectDis < nptDistance) {
             tmpnpt = nearest(x.left, p, npt, rectList[0]);
             if (tmpnpt == null) {
                 if (rigtRectDis < nptDistance) {
                     tmpnpt = nearest(x.right, p, npt, rectList[1]);
                 }
-            } else {
+            }
+            else {
                 if (tmpnpt.distanceSquaredTo(p) < nptDistance) {
                     nptDistance = tmpnpt.distanceSquaredTo(p);
-                } else {
+                }
+                else {
                     tmpnpt = npt;
                 }
                 if (rigtRectDis < nptDistance) {
@@ -297,12 +305,12 @@ public class KdTree {
         Stack<Node> nds = new Stack<Node>();
         Stack<RectHV> rects = new Stack<RectHV>();
         Point2D npt = root.pt;
-        Double nptDistance = npt.distanceSquaredTo(p);
+        double nptDistance = npt.distanceSquaredTo(p);
         nds.push(root);
         rects.push(rect);
         while (!nds.isEmpty()) {
             Node nd = nds.pop();
-//            StdOut.println(nd);
+            //            StdOut.println(nd);
             rect = rects.pop();
             if (rect.distanceSquaredTo(p) >= nptDistance) continue;
             if (nd.pt.distanceSquaredTo(p) < nptDistance) {
@@ -320,7 +328,8 @@ public class KdTree {
                     nds.push(nd.right);
                     rects.push(tmpRectList[1]);
                 }
-            } else {
+            }
+            else {
                 if (nd.right != null && tmpRectList[1].distanceSquaredTo(p) < nptDistance) {
                     nds.push(nd.right);
                     rects.push(tmpRectList[1]);

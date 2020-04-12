@@ -1,9 +1,9 @@
 import edu.princeton.cs.algs4.Queue;
+import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
 public class ST<Key extends Comparable<Key>, Value> {
     private Node root;
-
 
     private class Node implements Comparable<Node> {
         private final Key key;
@@ -23,8 +23,8 @@ public class ST<Key extends Comparable<Key>, Value> {
         // does this equal y?
         @Override
         public boolean equals(Object y) {
-            if (y == this) return true;
             if (y == null) return false;
+            if (y == this) return true;
             if (y.getClass() != this.getClass()) return false;
             Node that = (Node) y;
             return that.key.compareTo(this.key) == 0;
@@ -182,23 +182,43 @@ public class ST<Key extends Comparable<Key>, Value> {
         else return x.getCount();
     }
 
-//    public Iterable<Key> sortedKeys() {
-//        // All the keys in the table. Return an iterable object
-//        if (root == null) return null;
-//        Stack<Key> list = new Stack<Key>();
-//        Stack<Node> ndlist = new Stack<Node>();
-//        ndlist.push(root);
-//        list.push(root.getKey());
-//        while (!ndlist.isEmpty()) {
-//            Node rt = ndlist.pop();
-//            Node tmp = rt;
-//            while (tmp.right != null) {
-//                ndlist.push(tmp.right);
-//                tmp = tmp.right;
-//            }
-//        }
-//        return list.iterator();
-//    }
+    public Iterable<Key> reverseSortedKeys() {
+        // All the keys in reverse sorted the table. Return an iterable object
+        if (root == null) return null;
+        Stack<Key> list = new Stack<Key>();
+        Stack<Node> ndlist = new Stack<Node>();
+        Node tmp = root;
+        do {
+            while (tmp != null) {
+                ndlist.push(tmp);
+                tmp = tmp.left;
+            }
+            tmp = ndlist.pop();
+            list.push(tmp.getKey());
+            tmp = tmp.right;
+        } while (!ndlist.isEmpty() || tmp != null);
+
+        return list;
+    }
+
+    public Iterable<Key> sortedKeys() {
+        // All the keys in reverse sorted the table. Return an iterable object
+        if (root == null) return null;
+        Queue<Key> list = new Queue<Key>();
+        Stack<Node> ndlist = new Stack<Node>();
+        Node tmp = root;
+        do {
+            while (tmp != null) {
+                ndlist.push(tmp);
+                tmp = tmp.left;
+            }
+            tmp = ndlist.pop();
+            list.enqueue(tmp.getKey());
+            tmp = tmp.right;
+        } while (!ndlist.isEmpty() || tmp != null);
+
+        return list;
+    }
 
     public Iterable<Key> keys() {
         if (root == null) return null;
@@ -218,14 +238,33 @@ public class ST<Key extends Comparable<Key>, Value> {
         return keys;
     }
 
-//
-//    Iterable<Key> keys(Key lo, Key hi) {
-//        // Keys in [lo..hi], in sorted order
-//    }
-//
-//    public int size(Key lo, Key hi) {
-//        // Number of keys in [lo..hi]
-//    }
+
+    Iterable<Key> keys(Key lo, Key hi) {
+        // Keys in [lo..hi], in sorted order
+        Queue<Key> que = new Queue<Key>();
+        keys(root, que, lo, hi);
+        return que;
+    }
+
+    private void keys(Node x, Queue<Key> que, Key lo, Key hi) {
+        if (x == null) return;
+        int loCmp = lo.compareTo(x.getKey());
+        int hiCmp = hi.compareTo(x.getKey());
+        if (loCmp < 0) keys(x.left, que, lo, hi);
+        if (hiCmp > 0) keys(x.right, que, lo, hi);
+        if (loCmp <= 0 && hiCmp >= 0) {
+            que.enqueue(x.getKey());
+        }
+    }
+
+    public int size(Key lo, Key hi) {
+        // Number of keys in [lo..hi]
+        int rangeSize = 0;
+        for (Key s : keys(lo, hi)) {
+            rangeSize++;
+        }
+        return rangeSize;
+    }
 
     private Node deleteMax(Node x) {
         if (x == null) return null;
@@ -260,7 +299,8 @@ public class ST<Key extends Comparable<Key>, Value> {
     private Key select(Node x, int rank) {
 //        if (x == null || rank == 0) return null;
         int leftNodeSize = size(x.left);
-        if (leftNodeSize + 1 < rank) return select(x.right, rank - leftNodeSize - 1);
+        if (leftNodeSize + 1 < rank)
+            return select(x.right, rank - leftNodeSize - 1);
         else if (leftNodeSize + 1 == rank) return x.getKey();
         else return select(x.left, rank);
 
@@ -364,20 +404,39 @@ public class ST<Key extends Comparable<Key>, Value> {
         for (String s : list) {
             st.put(s, 0);
         }
+        StdOut.print("Print Keys: ");
         for (String s : st.keys()) {
             StdOut.print(s + ", ");
         }
         StdOut.println();
         st.delete("H");
+        StdOut.print("Print deleting H: ");
         for (String s : st.keys()) {
             StdOut.print(s + ", ");
         }
         StdOut.println();
         st.deleteMax();
+        StdOut.print("Print keys after deleting Max: ");
         for (String s : st.keys()) {
             StdOut.print(s + ", ");
         }
         StdOut.println();
+        StdOut.print("Print sorted keys: ");
+        for (String s : st.sortedKeys()) {
+            StdOut.print(s + ", ");
+        }
+        StdOut.println();
+        StdOut.print("Print reversed keys: ");
+        for (String s : st.reverseSortedKeys()) {
+            StdOut.print(s + ", ");
+        }
+        StdOut.println();
+        StdOut.print("Print keys ranging between 'E' and 'P': ");
+        for (String s : st.keys("E", "P")) {
+            StdOut.print(s + ", ");
+        }
+        StdOut.println();
+
         StdOut.println(st.size());
         StdOut.println(st.min());
         StdOut.println(st.max());

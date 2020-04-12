@@ -53,6 +53,7 @@
     <Match>
         <BugPattern name="AI_ANNOTATION_ISSUES_NEEDS_NULLABLE,
                           BL_BURYING_LOGIC,
+                          CC_CYCLOMATIC_COMPLEXITY,
                           CE_CLASS_ENVY,
                           CLI_CONSTANT_LIST_INDEX,
                           CSI_CHAR_SET_ISSUES_USE_STANDARD_CHARSET,
