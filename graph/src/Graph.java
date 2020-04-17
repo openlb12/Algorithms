@@ -1,5 +1,6 @@
 import edu.princeton.cs.algs4.Bag;
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Graph {
@@ -16,6 +17,7 @@ public class Graph {
             this.adjecent[i] = new Bag<Integer>();
         }
     }
+
 
     public Graph(In in) {
         this(in.readInt());
@@ -35,6 +37,10 @@ public class Graph {
         return edgesize;
     }
 
+    public int degree(int v) {
+        return adjecent[v].size();
+    }
+
     public void addEdge(int v1, int v2) {
         adjecent[v1].add(v2);
         adjecent[v2].add(v1);
@@ -43,6 +49,10 @@ public class Graph {
 
     public Iterable<Integer> adj(int v) {
         return adjecent[v];
+    }
+
+    public boolean isCycled() {
+
     }
 
     public String toString() {
@@ -57,9 +67,42 @@ public class Graph {
         return str.toString();
     }
 
+    public int[] subsets() {
+        boolean[] marked = new boolean[verticesize];
+        int[] subsets = new int[verticesize];
+        int loop = 0;
+        for (int i = 0; i < verticesize; i++) {
+            marked[i] = false;
+            subsets[i] = Integer.MAX_VALUE;
+        }
+        for (int i = 0; i < verticesize; i++) {
+            if (marked[i]) continue;
+            Stack<Integer> checkpoints = new Stack<Integer>();
+            Stack<Integer> trace = new Stack<Integer>();
+            checkpoints.push(i);
+            marked[i] = true;
+            subsets[i] = loop;
+            while (!checkpoints.isEmpty()) {
+                int apex = checkpoints.pop();
+                marked[apex] = true;
+                subsets[apex] = loop;
+                for (int adj : adjecent[apex]) {
+                    if (!marked[adj]) {
+                        checkpoints.push(adj);
+                    }
+                }
+            }
+            loop++;
+        }
+        return subsets;
+    }
+
     public static void main(String[] args) {
         In inp = new In(args[0]);
         Graph gph = new Graph(inp);
         StdOut.print(gph);
+        for (int item : gph.subsets()) {
+            StdOut.print(item);
+        }
     }
 }
