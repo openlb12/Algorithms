@@ -6,15 +6,15 @@ import edu.princeton.cs.algs4.StdOut;
 public class Graph {
     private int verticesize;
     private int edgesize;
-    private Bag<Integer>[] adjecent;
+    private Bag<Integer>[] adjacent;
 
     public Graph(int verticesize) {
         // construct Graph with vs vertices
         this.verticesize = verticesize;
         this.edgesize = 0;
-        this.adjecent = (Bag<Integer>[]) new Bag[this.verticesize];
+        this.adjacent = (Bag<Integer>[]) new Bag[this.verticesize];
         for (int i = 0; i < this.verticesize; i++) {
-            this.adjecent[i] = new Bag<Integer>();
+            this.adjacent[i] = new Bag<Integer>();
         }
     }
 
@@ -38,21 +38,74 @@ public class Graph {
     }
 
     public int degree(int v) {
-        return adjecent[v].size();
+        return adjacent[v].size();
     }
 
     public void addEdge(int v1, int v2) {
-        adjecent[v1].add(v2);
-        adjecent[v2].add(v1);
+        adjacent[v1].add(v2);
+        adjacent[v2].add(v1);
         edgesize++;
     }
 
     public Iterable<Integer> adj(int v) {
-        return adjecent[v];
+        return adjacent[v];
+    }
+
+    private boolean isSelfLooped() {
+        // if the adjacent vertice contains itself, then it is selflooped.
+        for (int i = 0; i < verticesize; i++) {
+            for (int w : adjacent[i]) {
+                if (w == i) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isParalled() {
+        // if there are two edges connect the neighbouring vertice, then it is
+        // paralled.
+        boolean[] marked = new boolean[verticesize];
+        for (int i = 0; i < verticesize; i++) {
+            for (int w : adjacent[i]) {
+                if (marked[w]) {
+                    return true;
+                }
+                marked[w] = true;
+            }
+            for (int j = 0; j < verticesize; j++) {
+                // reset marked for next adjacent judge
+                marked[j] = false;
+            }
+        }
+        return false;
     }
 
     public boolean isCycled() {
-
+        if (isSelfLooped()) return true;
+        if (isParalled()) return true;
+        boolean[] marked = new boolean[verticesize];
+        int[] edgeTo = new int[verticesize];
+        Stack<Integer> checkpoint;
+        for (int i = 0; i < verticesize; i++) {
+            if (marked[i]) continue;
+            checkpoint = new Stack<Integer>();
+            checkpoint.push(i);
+            edgeTo[i] = i;
+            while (!checkpoint.isEmpty()) {
+                int apex = checkpoint.pop();
+                if (marked[apex]) return true;
+                marked[apex] = true;
+                for (int adj : adjacent[apex]) {
+                    if (!marked[adj]) {
+                        checkpoint.push(adj);
+                        edgeTo[adj] = apex;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public String toString() {
@@ -80,13 +133,12 @@ public class Graph {
             Stack<Integer> checkpoints = new Stack<Integer>();
             Stack<Integer> trace = new Stack<Integer>();
             checkpoints.push(i);
-            marked[i] = true;
-            subsets[i] = loop;
             while (!checkpoints.isEmpty()) {
                 int apex = checkpoints.pop();
+                if (marked[apex]) continue;
                 marked[apex] = true;
                 subsets[apex] = loop;
-                for (int adj : adjecent[apex]) {
+                for (int adj : adjacent[apex]) {
                     if (!marked[adj]) {
                         checkpoints.push(adj);
                     }
@@ -100,6 +152,7 @@ public class Graph {
     public static void main(String[] args) {
         In inp = new In(args[0]);
         Graph gph = new Graph(inp);
+        if (gph.isCycled()) StdOut.println("Is circled");
         StdOut.print(gph);
         for (int item : gph.subsets()) {
             StdOut.print(item);

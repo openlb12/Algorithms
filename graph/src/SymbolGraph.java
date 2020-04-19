@@ -1,4 +1,9 @@
-import edu.princeton.cs.algs4.*;
+import edu.princeton.cs.algs4.Bag;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Queue;
+import edu.princeton.cs.algs4.ST;
+import edu.princeton.cs.algs4.Stack;
+import edu.princeton.cs.algs4.StdOut;
 
 public class SymbolGraph {
     private ST<String, Integer> st;
@@ -53,7 +58,8 @@ public class SymbolGraph {
                 chn.append(keys[tr] + " ");
             }
             return chn.toString();
-        } else {
+        }
+        else {
             return String.format("%s and %s are unrelated", p1, p2);
         }
     }
@@ -183,6 +189,7 @@ public class SymbolGraph {
             edgeTo[p1] = p1;
             while (!checkpoints.isEmpty()) {
                 int apex = checkpoints.pop();
+                if (marked[apex]) continue;
                 if (apex == p2) {
                     int tmp = p2;
                     while (edgeTo[tmp] != tmp) {
