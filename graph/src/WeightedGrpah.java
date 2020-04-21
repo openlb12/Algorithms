@@ -85,14 +85,26 @@ public class WeightedGrpah {
         for (Edge ed : edges()) {
             edges.insert(ed);
         }
+        Edge edmin = edges.min();
+        marked[edmin.either()] = true;
         while (!edges.isEmpty()) {
             Edge ed = edges.delMin();
             int bgn = ed.either();
             int end = ed.other(bgn);
             if (marked[bgn] && marked[end]) continue;
+            else if (!marked[bgn] && !marked[end]) continue;
             else {
-                marked[bgn] = true;
-                marked[end] = true;
+                if (marked[end]) {
+                    marked[bgn] = true;
+                    for (Edge ied : adj(bgn)) {
+                        edges.insert(ied);
+                    }
+                } else {
+                    marked[end] = true;
+                    for (Edge ied : adj(end)) {
+                        edges.insert(ied);
+                    }
+                }
                 edgeLength += ed.getWeight();
                 trace.push(ed);
             }
