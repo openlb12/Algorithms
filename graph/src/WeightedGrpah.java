@@ -18,9 +18,16 @@ public class WeightedGrpah {
 
     public WeightedGrpah(In in) {
         VERTICESIZE = in.readInt();
+        adjacent = (Bag<Edge>[]) new Bag[VERTICESIZE];
+        for (int i = 0; i < VERTICESIZE; i++) {
+            adjacent[i] = new Bag<Edge>();
+        }
         int edges = in.readInt();
         for (int i = 0; i < edges; i++) {
-            addEdge(new Edge(in.readInt(), in.readInt(), in.readDouble()));
+            int start = in.readInt();
+            int end = in.readInt();
+            double length = in.readDouble();
+            addEdge(new Edge(start, end, length));
         }
     }
 
@@ -37,19 +44,42 @@ public class WeightedGrpah {
     }
 
     public Iterable<Edge> edges() {
-        return new Stack<Edge>();
+        Stack<Edge> eds = new Stack<Edge>();
+        for (int i = 0; i < VERTICESIZE; i++) {
+            for (Edge ed : adjacent[i]) {
+                if (ed.other(i) >= i) eds.push(ed);
+            }
+        }
+        return eds;
     }
 
     public void addEdge(Edge ed) {
         int end = ed.either();
-        adjacent[end].add(ed);
-        adjacent[ed.other(end)].add(ed);
-        edgeSize++;
+        int other = ed.other(end);
+        if (end == other) {
+            adjacent[end].add(ed);
+            edgeSize++;
+        } else {
+            adjacent[end].add(ed);
+            adjacent[other].add(ed);
+            edgeSize++;
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append(String.format("vertices: %d, edges: %d\n", VERTICESIZE, edgeSize));
+        for (Edge ed : this.edges()) {
+            str.append(ed.toString() + "\n");
+        }
+        return str.toString();
     }
 
     public static void main(String[] args) {
-        Edge e = new Edge(12, 34, 5.67);
-        StdOut.println(e);
+        In in = new In(args[0]);
+        WeightedGrpah G = new WeightedGrpah(in);
+        StdOut.println(G);
     }
 }
 
@@ -68,12 +98,20 @@ class Edge implements Comparable<Edge> {
         return v;
     }
 
+    /**
+     * @param w
+     * @return int
+     */
     public int other(int w) {
         if (w == this.w) return this.v;
         else if (w == this.v) return this.w;
         else throw new IllegalArgumentException("Illegal endpoint");
     }
 
+    /**
+     * @param ob
+     * @return int <0: ob is greater, =0: equal; >0: ob is smaller
+     */
     @Override
     public int compareTo(Edge ob) {
         return Double.compare(this.weight, ob.weight);
