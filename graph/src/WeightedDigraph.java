@@ -1,5 +1,6 @@
 import edu.princeton.cs.algs4.Bag;
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.IndexMaxPQ;
 import edu.princeton.cs.algs4.IndexMinPQ;
 import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.Stack;
@@ -35,7 +36,7 @@ public class WeightedDigraph {
         for (int i = 0; i < edges; i++) {
             int start = in.readInt();
             int end = in.readInt();
-            double length = 1.0;
+            double length = in.readDouble();
             addEdge(new Diedge(start, end, length));
         }
     }
@@ -85,7 +86,7 @@ public class WeightedDigraph {
         int[] edgeFrom = new int[VERTICESIZE];
         boolean[] marked = new boolean[VERTICESIZE];
         for (int i = 0; i < VERTICESIZE; i++) {
-            distanceTo[i] = Double.MAX_VALUE;
+            distanceTo[i] = Double.POSITIVE_INFINITY;
         }
         edgeFrom[v] = v;
         distanceTo[v] = 0.0;
@@ -106,7 +107,7 @@ public class WeightedDigraph {
                 if (distanceTo[end] + ded.getWeight() < distanceTo[dedEnd]) {
                     distanceTo[dedEnd] = distanceTo[end] + ded.getWeight();
                     edgeFrom[dedEnd] = end;
-                    if (!marked[dedEnd]) edges.enqueue(ded);
+                    edges.enqueue(ded);
                 }
             }
             if (edges.size() > dataSize) dataSize = edges.size();
@@ -231,7 +232,6 @@ public class WeightedDigraph {
         if (!isDAG()) return null;
         marked = new boolean[VERTICESIZE];
         trace = new Stack<Integer>();
-        Stack<Integer> top = new Stack<Integer>();
         for (int i = 0; i < VERTICESIZE; i++) {
             if (marked[i]) continue;
             dfs(i);
@@ -240,8 +240,121 @@ public class WeightedDigraph {
 
     }
 
-    public String dijkstra() {
-        return "";
+
+    public String acyclic_spt(int v) {
+        if (!isDAG()) throw new IllegalArgumentException("Digraph is not acyclic.");
+        boolean[] marked = new boolean[VERTICESIZE];
+        double[] distanceTo = new double[VERTICESIZE];
+        int[] edgeFrom = new int[VERTICESIZE];
+        IndexMinPQ<Double> track = new IndexMinPQ<Double>(VERTICESIZE);
+        for (int i = 0; i < VERTICESIZE; i++) {
+            distanceTo[i] = Double.POSITIVE_INFINITY;
+        }
+        distanceTo[v] = 0.0;
+        edgeFrom[v] = v;
+
+        for (int id : topolocical()) {
+            if (marked[id]) continue;
+            track.insert(id, distanceTo[id]);
+
+            while (!track.isEmpty()) {
+                int apex = track.minIndex();
+                double distance = track.minKey();
+                marked[apex] = true;
+                track.delMin();
+                for (Diedge eg : adjacent[apex]) {
+                    int end = eg.getTo();
+                    if (distanceTo[end] > eg.getWeight() + distance) {
+                        distanceTo[end] = eg.getWeight() + distance;
+                        edgeFrom[end] = apex;
+                        if (track.contains(end)) {
+                            track.decreaseKey(end, distanceTo[end]);
+                        } else {
+                            track.insert(end, distanceTo[end]);
+                        }
+
+                    }
+                }
+            }
+
+        }
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < VERTICESIZE; i++) {
+            if (distanceTo[i] < Double.MAX_VALUE) {
+                int vs = i;
+                Stack<Integer> trace = new Stack<Integer>();
+                while (edgeFrom[vs] != vs) {
+                    vs = edgeFrom[vs];
+                    trace.push(vs);
+                }
+                str.append(String.format("distance %d -> %d: %.5f\n", vs, i, distanceTo[i]));
+
+                while (!trace.isEmpty()) {
+                    str.append(String.format("%d -> ", trace.pop()));
+                }
+                str.append(String.format("%d\n", i));
+
+            }
+        }
+        return str.toString();
+
+    }
+
+    public String acyclic_lpt() {
+        if (!isDAG()) throw new IllegalArgumentException("Digraph is not acyclic.");
+        boolean[] marked = new boolean[VERTICESIZE];
+        double[] distanceTo = new double[VERTICESIZE];
+        int[] edgeFrom = new int[VERTICESIZE];
+        IndexMaxPQ<Double> track = new IndexMaxPQ<Double>(VERTICESIZE);
+        for (int i = 0; i < VERTICESIZE; i++) {
+            distanceTo[i] = Double.NEGATIVE_INFINITY;
+        }
+        for (int id : topolocical()) {
+            if (marked[id]) continue;
+            edgeFrom[id] = id;
+            distanceTo[id] = 0.0;
+            track.insert(id, distanceTo[id]);
+            while (!track.isEmpty()) {
+                int apex = track.maxIndex();
+                double distance = track.maxKey();
+                marked[apex] = true;
+                track.delMax();
+                for (Diedge eg : adjacent[apex]) {
+                    int end = eg.getTo();
+                    if (distanceTo[end] < eg.getWeight() + distance) {
+                        distanceTo[end] = eg.getWeight() + distance;
+                        edgeFrom[end] = apex;
+                        if (track.contains(end)) {
+                            track.increaseKey(end, distanceTo[end]);
+                        } else {
+                            track.insert(end, distanceTo[end]);
+                        }
+
+                    }
+                }
+            }
+
+        }
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < VERTICESIZE; i++) {
+            if (distanceTo[i] > Double.NEGATIVE_INFINITY) {
+                int vs = i;
+                Stack<Integer> trace = new Stack<Integer>();
+                while (edgeFrom[vs] != vs) {
+                    vs = edgeFrom[vs];
+                    trace.push(vs);
+                }
+                str.append(String.format("distance %d -> %d: %.5f\n", vs, i, distanceTo[i]));
+
+                while (!trace.isEmpty()) {
+                    str.append(String.format("%d -> ", trace.pop()));
+                }
+                str.append(String.format("%d\n", i));
+
+            }
+        }
+        return str.toString();
+
     }
 
     public static void main(String[] args) {
@@ -251,12 +364,15 @@ public class WeightedDigraph {
         for (int i : G.topolocical()) {
             StdOut.print(String.format("%d -> ", i));
         }
+        StdOut.println();
+        StdOut.print(G.acyclic_lpt());
         while (!StdIn.isEmpty()) {
             int vertice = StdIn.readInt();
             StdOut.print(G.queue_spt(vertice));
             int qSize = G.dataSize;
             StdOut.print(G.indexMinPQ_spt(vertice));
             int iSize = G.dataSize;
+            StdOut.print(G.acyclic_spt(vertice));
             StdOut.println(String.format("Queue size %d vs IndexMinPQ size %d", qSize, iSize));
         }
     }
