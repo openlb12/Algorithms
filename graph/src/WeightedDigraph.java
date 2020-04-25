@@ -241,7 +241,7 @@ public class WeightedDigraph {
     }
 
 
-    public String acyclic_spt(int v) {
+    public String acyclic_spt() {
         if (!isDAG()) throw new IllegalArgumentException("Digraph is not acyclic.");
         boolean[] marked = new boolean[VERTICESIZE];
         double[] distanceTo = new double[VERTICESIZE];
@@ -250,33 +250,21 @@ public class WeightedDigraph {
         for (int i = 0; i < VERTICESIZE; i++) {
             distanceTo[i] = Double.POSITIVE_INFINITY;
         }
-        distanceTo[v] = 0.0;
-        edgeFrom[v] = v;
+
 
         for (int id : topolocical()) {
-            if (marked[id]) continue;
-            track.insert(id, distanceTo[id]);
-
-            while (!track.isEmpty()) {
-                int apex = track.minIndex();
-                double distance = track.minKey();
-                marked[apex] = true;
-                track.delMin();
-                for (Diedge eg : adjacent[apex]) {
-                    int end = eg.getTo();
-                    if (distanceTo[end] > eg.getWeight() + distance) {
-                        distanceTo[end] = eg.getWeight() + distance;
-                        edgeFrom[end] = apex;
-                        if (track.contains(end)) {
-                            track.decreaseKey(end, distanceTo[end]);
-                        } else {
-                            track.insert(end, distanceTo[end]);
-                        }
-
-                    }
-                }
+            if (distanceTo[id] == Double.POSITIVE_INFINITY) {
+                distanceTo[id] = 0.0;
+                edgeFrom[id] = id;
             }
+            for (Diedge eg : adjacent[id]) {
+                int end = eg.getTo();
+                if (distanceTo[end] > eg.getWeight() + distanceTo[id]) {
+                    distanceTo[end] = eg.getWeight() + distanceTo[id];
+                    edgeFrom[end] = id;
+                }
 
+            }
         }
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < VERTICESIZE; i++) {

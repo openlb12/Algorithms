@@ -71,7 +71,3 @@ public class DegreesOfSeparationDFS {
         }
     }
 }
-
-
-Copyright © 2000–2017,Robert Sedgewick and Kevin Wayne.
-        Last updated:Fri Oct 20 12:50:46 EDT 2017.
