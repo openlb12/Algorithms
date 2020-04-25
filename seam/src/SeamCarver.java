@@ -183,11 +183,18 @@ public class SeamCarver {
         distanceTo[0] = 0.0;
         for (int p : topologcial_h()) {
             for (int np : neighbours_h(p)) {
-                int x = (np - 1) % width;
-                int y = (np - 1) / width;
-                if (distanceTo[np] < distanceTo[p] + energy[x][y]) {
-                    distanceTo[np] = distanceTo[p] + energy[x][y];
-                    edgeFrom[np] = p;
+                try {
+                    int x = (np - 1) % width;
+                    int y = (np - 1) / width;
+                    if (distanceTo[np] > distanceTo[p] + energy[x][y]) {
+                        distanceTo[np] = distanceTo[p] + energy[x][y];
+                        edgeFrom[np] = p;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    if (distanceTo[np] > distanceTo[p]) {
+                        distanceTo[np] = distanceTo[p];
+                        edgeFrom[np] = p;
+                    }
                 }
             }
         }
@@ -212,13 +219,20 @@ public class SeamCarver {
         }
         edgeFrom[0] = 0;
         distanceTo[0] = 0.0;
-        for (int p : topologcial_h()) {
-            for (int np : neighbours_h(p)) {
-                int x = (np - 1) % width;
-                int y = (np - 1) / width;
-                if (distanceTo[np] < distanceTo[p] + energy[x][y]) {
-                    distanceTo[np] = distanceTo[p] + energy[x][y];
-                    edgeFrom[np] = p;
+        for (int p : topologcial_v()) {
+            for (int np : neighbours_v(p)) {
+                try {
+                    int x = (np - 1) % width;
+                    int y = (np - 1) / width;
+                    if (distanceTo[np] > distanceTo[p] + energy[x][y]) {
+                        distanceTo[np] = distanceTo[p] + energy[x][y];
+                        edgeFrom[np] = p;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    if (distanceTo[np] > distanceTo[p]) {
+                        distanceTo[np] = distanceTo[p];
+                        edgeFrom[np] = p;
+                    }
                 }
             }
         }
@@ -256,5 +270,7 @@ public class SeamCarver {
                 StdOut.printf("%9.0f ", sc.energy(col, row));
             StdOut.println();
         }
+
+
     }
 }
