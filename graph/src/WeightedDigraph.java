@@ -360,7 +360,7 @@ public class WeightedDigraph {
             int qSize = G.dataSize;
             StdOut.print(G.indexMinPQ_spt(vertice));
             int iSize = G.dataSize;
-            StdOut.print(G.acyclic_spt(vertice));
+            StdOut.print(G.acyclic_spt());
             StdOut.println(String.format("Queue size %d vs IndexMinPQ size %d", qSize, iSize));
         }
     }
