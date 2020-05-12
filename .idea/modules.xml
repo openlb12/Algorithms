@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/baseballElimination/baseballElimination.iml" filepath="$PROJECT_DIR$/baseballElimination/baseballElimination.iml" />
       <module fileurl="file://$PROJECT_DIR$/boggle/boggle.iml" filepath="$PROJECT_DIR$/boggle/boggle.iml" />
+      <module fileurl="file://$PROJECT_DIR$/burrows/burrows.iml" filepath="$PROJECT_DIR$/burrows/burrows.iml" />
       <module fileurl="file://$PROJECT_DIR$/collisionSystem/collisionSystem.iml" filepath="$PROJECT_DIR$/collisionSystem/collisionSystem.iml" />
       <module fileurl="file://$PROJECT_DIR$/graph/graph.iml" filepath="$PROJECT_DIR$/graph/graph.iml" />
       <module fileurl="file://$PROJECT_DIR$/kdtree/kdtree.iml" filepath="$PROJECT_DIR$/kdtree/kdtree.iml" />
