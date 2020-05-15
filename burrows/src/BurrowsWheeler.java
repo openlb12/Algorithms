@@ -1,7 +1,6 @@
 import edu.princeton.cs.algs4.BinaryStdIn;
 import edu.princeton.cs.algs4.BinaryStdOut;
-
-import java.util.Arrays;
+import edu.princeton.cs.algs4.Stack;
 
 public class BurrowsWheeler {
 
@@ -46,28 +45,35 @@ public class BurrowsWheeler {
     public static void inverseTransform() {
         while (!BinaryStdIn.isEmpty()) {
             int first = BinaryStdIn.readInt();
-//            StdOut.print(first);
             String str = BinaryStdIn.readString();
-            int length = str.length();
-//            StdOut.print(first);
-            Elem[] sortedStr = new Elem[length];
-            for (int i = 0; i < length; i++) {
-                sortedStr[i] = new Elem(str.charAt(i), i);
-//                StdOut.print(str.charAt(i));
-            }
-            Arrays.sort(sortedStr);
 
-            BinaryStdOut.write(sortedStr[first].key, 8);
-//            StdOut.print(sortedStr[first].key);
-            int index = sortedStr[first].next;
-            int len = 1;
-            while (len < length) {
-                BinaryStdOut.write(sortedStr[index].key, 8);
-//                StdOut.print(sortedStr[index].key);
-                index = sortedStr[index].next;
+            int[] count = new int[256 + 1];
+            int[] sortedIndex = new int[str.length()];
+
+
+            for (int i = 0; i < str.length(); i++) {
+                count[str.charAt(i) + 1]++;
+            }
+
+            for (int i = 1; i < count.length; i++) {
+                count[i] += count[i - 1];
+            }
+
+            for (int i = 0; i < str.length(); i++) {
+                sortedIndex[i] = count[str.charAt(i)]++;
+            }
+
+            int index = first;
+            int len = 0;
+            Stack<Character> st = new Stack<Character>();
+            while (len < str.length()) {
+                st.push(str.charAt(index));
+                index = sortedIndex[index];
                 len++;
             }
-
+            while (!st.isEmpty()) {
+                BinaryStdOut.write(st.pop(), 8);
+            }
 
         }
         BinaryStdOut.flush();
